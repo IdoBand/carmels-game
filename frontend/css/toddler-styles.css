@@ -1,0 +1,784 @@
+/* Toddler-Friendly Counting Game Styles */
+
+/* CSS Variables for easy theme management */
+:root {
+    --primary-color: #FF6B6B;
+    --secondary-color: #4ECDC4;
+    --accent-color: #FFE066;
+    --success-color: #51CF66;
+    --warning-color: #FF8A65;
+    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-background: rgba(255, 255, 255, 0.95);
+    --text-dark: #2D3748;
+    --text-light: #FFFFFF;
+    --border-radius: 25px;
+    --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--background-gradient);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    overflow-x: hidden;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* When video is active, center everything */
+.video-active #game-container {
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+/* Header Styles */
+#game-header {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(10px);
+}
+
+#game-header h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    animation: bounce 2s infinite;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connecting {
+    background-color: var(--warning-color);
+}
+
+.status-dot.connected {
+    background-color: var(--success-color);
+}
+
+.status-dot.error {
+    background-color: var(--primary-color);
+}
+
+/* Main Game Area */
+#game-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* When video is active, center the video */
+.video-active #game-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+.video-active .video-section {
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    background: #000;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Avatar Section */
+#avatar-section {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+#avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.avatar.happy {
+    background: linear-gradient(45deg, var(--success-color), var(--secondary-color));
+}
+
+.avatar.excited {
+    background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+    animation: wiggle 0.5s infinite;
+}
+
+.avatar.celebrating {
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    animation: celebrate 1s infinite;
+}
+
+.eyes {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.eye {
+    width: 25px;
+    height: 25px;
+    background-color: var(--text-dark);
+    border-radius: 50%;
+    animation: blink 3s infinite;
+}
+
+.mouth {
+    width: 60px;
+    height: 30px;
+    border-radius: 0 0 60px 60px;
+    background-color: var(--text-dark);
+}
+
+.happy-mouth {
+    background-color: var(--text-dark);
+    animation: smile 2s infinite;
+}
+
+.speech-bubble {
+    position: relative;
+    background: var(--text-light);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--box-shadow);
+    max-width: 300px;
+    border: 3px solid var(--secondary-color);
+}
+
+.speech-bubble::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 15px solid var(--secondary-color);
+}
+
+.speech-bubble p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+/* Game Content */
+#game-content {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Video Feed Section - Simple Large Video */
+.video-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: #000;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.video-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: #000;
+}
+
+.video-feed {
+    width: 90vw;
+    height: 90vh;
+    object-fit: contain;
+    display: block;
+    border-radius: 15px;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.gesture-indicator {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--text-light);
+    padding: 15px 20px;
+    border-radius: 25px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Number Display Overlay - Bottom Right */
+.number-display-overlay {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 3px solid var(--accent-color);
+    text-align: center;
+    min-width: 120px;
+}
+
+.current-number-overlay {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.number-dots-overlay {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.number-dots-overlay .dot {
+    width: 15px;
+    height: 15px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Hide setup UI when video is active */
+.video-active .game-setup-ui {
+    display: none !important;
+}
+
+.number-display {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.current-number {
+    font-size: 8rem;
+    font-weight: bold;
+    color: var(--text-light);
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+    animation: number-pulse 1s infinite;
+}
+
+.number-dots {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 30px;
+    height: 30px;
+    background-color: var(--text-light);
+    border-radius: 50%;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+    animation: dot-bounce 0.6s infinite alternate;
+}
+
+.instruction-panel {
+    text-align: center;
+    padding: 20px;
+}
+
+.instruction-panel h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.instruction-panel p {
+    font-size: 1.3rem;
+    color: var(--text-dark);
+}
+
+.progress-section {
+    text-align: center;
+    padding: 20px;
+}
+
+.progress-label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color), var(--secondary-color));
+    transition: width 0.5s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 10px;
+    color: var(--text-dark);
+}
+
+/* Camera Setup */
+.camera-setup {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(10px);
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.camera-controls h3 {
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+}
+
+.camera-list {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.camera-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.camera-option:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.camera-option.selected {
+    border-color: var(--success-color);
+    background: rgba(81, 207, 102, 0.1);
+}
+
+/* Buttons */
+.btn {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: var(--font-family);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
+    min-width: 200px;
+    margin: 10px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--warning-color));
+    color: var(--text-light);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--success-color), var(--secondary-color));
+    color: var(--text-light);
+}
+
+/* Celebration Overlay */
+.celebration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.celebration-content {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: celebration-pop 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.celebration-content h1 {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    animation: rainbow 2s infinite;
+}
+
+.celebration-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: var(--text-dark);
+}
+
+.confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23FF6B6B"/><circle cx="40" cy="30" r="2" fill="%234ECDC4"/><circle cx="60" cy="25" r="2" fill="%23FFE066"/><circle cx="80" cy="35" r="2" fill="%2351CF66"/></svg>') repeat;
+    animation: confetti-fall 3s infinite linear;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+}
+
+.modal-content h3 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+/* Debug Panel */
+.debug-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--text-light);
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    z-index: 999;
+    min-width: 200px;
+}
+
+.debug-panel h4 {
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #game-main {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .video-feed {
+        width: 90vw;
+        height: 90vh;
+        object-fit: contain;
+    }
+
+    .video-active .video-feed {
+        width: 90vw;
+        height: 90vh;
+        object-fit: contain;
+    }
+
+    #game-header h1 {
+        font-size: 2rem;
+    }
+
+    .current-number {
+        font-size: 6rem;
+    }
+
+    .avatar {
+        width: 150px;
+        height: 150px;
+    }
+
+    .eyes {
+        gap: 20px;
+    }
+
+    .eye {
+        width: 20px;
+        height: 20px;
+    }
+
+    .mouth {
+        width: 50px;
+        height: 25px;
+    }
+
+    .speech-bubble {
+        max-width: 250px;
+        padding: 15px;
+    }
+
+    .btn {
+        min-width: 150px;
+        padding: 12px 24px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #game-container {
+        padding: 10px;
+    }
+
+    #game-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .current-number {
+        font-size: 4rem;
+    }
+
+    .celebration-content {
+        padding: 30px;
+    }
+
+    .celebration-content h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Animations */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes celebrate {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1.2) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+}
+
+@keyframes smile {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.2); }
+}
+
+@keyframes number-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes dot-bounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes celebration-pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rainbow {
+    0% { color: var(--primary-color); }
+    16% { color: var(--warning-color); }
+    32% { color: var(--accent-color); }
+    48% { color: var(--success-color); }
+    64% { color: var(--secondary-color); }
+    80% { color: var(--primary-color); }
+    100% { color: var(--primary-color); }
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-100px) rotate(0deg); }
+    100% { transform: translateY(200px) rotate(720deg); }
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Counting Game for Toddlers</title>
+    <link rel="stylesheet" href="css/toddler-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header with fun title -->
+        <header id="game-header" class="game-setup-ui">
+            <h1>🎮 Let's Count Together! 🎮</h1>
+            <div id="connection-status" class="status-indicator">
+                <span id="status-text">Connecting...</span>
+                <div id="status-dot" class="status-dot connecting"></div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main id="game-main">
+            <!-- Avatar Section -->
+            <section id="avatar-section" class="game-setup-ui">
+                <div id="avatar-container">
+                    <div id="avatar-face" class="avatar happy">
+                        <div class="eyes">
+                            <div class="eye left-eye"></div>
+                            <div class="eye right-eye"></div>
+                        </div>
+                        <div class="mouth happy-mouth"></div>
+                    </div>
+                    <div id="avatar-speech-bubble" class="speech-bubble">
+                        <p id="avatar-message">Hi there! I'm getting ready to play! 😊</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Game Content -->
+            <section id="game-content">
+                <!-- Real-time Video Feed (Full Screen) -->
+                <div id="video-section" class="video-section hidden">
+                    <div class="video-container">
+                        <img id="video-feed" class="video-feed" alt="Camera feed">
+                        <div class="video-overlay">
+                            <div id="gesture-indicator" class="gesture-indicator">Show your hand!</div>
+                            <!-- Number Display as overlay on video -->
+                            <div id="number-display" class="number-display-overlay">
+                                <div id="current-number" class="current-number-overlay">1</div>
+                                <div id="number-dots" class="number-dots-overlay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Instructions -->
+                <div id="instruction-panel" class="instruction-panel game-setup-ui">
+                    <h2 id="main-instruction">Getting ready to play...</h2>
+                    <p id="sub-instruction">Please wait while I set up the camera!</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progress-section" class="progress-section hidden game-setup-ui">
+                    <div class="progress-label">Numbers completed:</div>
+                    <div id="progress-bar" class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">0 / 10</div>
+                </div>
+            </section>
+
+            <!-- Camera Setup Section -->
+            <section id="camera-setup" class="camera-setup game-setup-ui">
+                <div class="camera-controls">
+                    <h3>📹 Camera Setup</h3>
+                    <button id="test-cameras-btn" class="btn btn-primary">Find My Camera</button>
+                    <div id="camera-list" class="camera-list hidden">
+                        <p>Available cameras:</p>
+                        <div id="camera-options"></div>
+                    </div>
+                    <button id="start-game-btn" class="btn btn-success hidden">Start Counting Game!</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Celebration Overlay -->
+        <div id="celebration-overlay" class="celebration-overlay hidden">
+            <div class="celebration-content">
+                <h1>🎉 Amazing Job! 🎉</h1>
+                <p>You counted all the way to 10!</p>
+                <div class="confetti"></div>
+                <button id="play-again-btn" class="btn btn-primary">Play Again!</button>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div id="error-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Oops! Something went wrong</h3>
+                <p id="error-message">We had a little problem. Let's try again!</p>
+                <button id="dismiss-error-btn" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+
+        <!-- Debug Panel (Hidden by default) -->
+        <div id="debug-panel" class="debug-panel hidden">
+            <h4>Debug Info</h4>
+            <div id="debug-info">
+                <p>Phase: <span id="debug-phase">-</span></p>
+                <p>Current Number: <span id="debug-number">-</span></p>
+                <p>Last Gesture: <span id="debug-gesture">-</span></p>
+                <p>Connection: <span id="debug-connection">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script src="js/game-client.js"></script>
+
+    <script>
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Initializing Toddler Counting Game...');
+
+            // Initialize audio manager
+            if (typeof AudioManager !== 'undefined') {
+                window.audioManager = new AudioManager();
+            }
+
+            // Initialize game client
+            if (typeof GameClient !== 'undefined') {
+                window.gameClient = new GameClient();
+                window.gameClient.connect();
+            } else {
+                console.error('❌ GameClient not loaded');
+                showError('Game scripts failed to load. Please refresh the page.');
+            }
+
+            // Debug mode toggle (press 'd' three times quickly)
+            let debugKeyCount = 0;
+            let debugKeyTimer = null;
+            document.addEventListener('keydown', function(e) {
+                if (e.key.toLowerCase() === 'd') {
+                    debugKeyCount++;
+                    clearTimeout(debugKeyTimer);
+                    debugKeyTimer = setTimeout(() => debugKeyCount = 0, 1000);
+
+                    if (debugKeyCount >= 3) {
+                        toggleDebugPanel();
+                        debugKeyCount = 0;
+                    }
+                }
+            });
+
+            function toggleDebugPanel() {
+                const debugPanel = document.getElementById('debug-panel');
+                debugPanel.classList.toggle('hidden');
+                console.log('🐛 Debug panel toggled');
+            }
+
+            function showError(message) {
+                const errorModal = document.getElementById('error-modal');
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = message;
+                errorModal.classList.remove('hidden');
+            }
+
+            // Error modal dismiss
+            document.getElementById('dismiss-error-btn').addEventListener('click', function() {
+                document.getElementById('error-modal').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
