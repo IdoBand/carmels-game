@@ -4,10 +4,10 @@
 :root {
     --primary-color: #FF6B6B;
     --secondary-color: #4ECDC4;
-    --accent-color: #FFE066;
+    --accent-color: #4e8bec;
     --success-color: #51CF66;
     --warning-color: #FF8A65;
-    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --background-gradient: linear-gradient(135deg, #078fff 0%, #6d4aec 100%);
     --card-background: rgba(255, 255, 255, 0.95);
     --text-dark: #2D3748;
     --text-light: #FFFFFF;
@@ -133,6 +133,10 @@ body {
     box-shadow: var(--box-shadow);
     backdrop-filter: blur(10px);
     text-align: center;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #avatar-container {
@@ -142,18 +146,13 @@ body {
     gap: 20px;
 }
 
-.avatar {
+.avatar-image {
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+    object-fit: cover;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    position: relative;
 }
 
 .avatar.happy {
@@ -299,35 +298,22 @@ body {
     right: 30px;
     background: rgba(0, 0, 0, 0.8);
     border-radius: 20px;
-    padding: 20px;
+    padding: 15px;
     backdrop-filter: blur(10px);
     border: 3px solid var(--accent-color);
     text-align: center;
-    min-width: 120px;
-}
-
-.current-number-overlay {
-    font-size: 4rem;
-    font-weight: bold;
-    color: var(--accent-color);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    margin-bottom: 10px;
-    line-height: 1;
-}
-
-.number-dots-overlay {
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
 }
 
-.number-dots-overlay .dot {
-    width: 15px;
-    height: 15px;
-    background-color: var(--accent-color);
-    border-radius: 50%;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+.number-image-overlay {
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
 /* Hide setup UI when video is active */
@@ -426,8 +412,11 @@ body {
     padding: 30px;
     box-shadow: var(--box-shadow);
     backdrop-filter: blur(10px);
-    grid-column: 1 / -1;
     text-align: center;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .camera-controls h3 {

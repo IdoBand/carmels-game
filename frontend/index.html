@@ -25,49 +25,10 @@
             <!-- Avatar Section -->
             <section id="avatar-section" class="game-setup-ui">
                 <div id="avatar-container">
-                    <div id="avatar-face" class="avatar happy">
-                        <div class="eyes">
-                            <div class="eye left-eye"></div>
-                            <div class="eye right-eye"></div>
-                        </div>
-                        <div class="mouth happy-mouth"></div>
-                    </div>
+                    <img id="avatar-image" class="avatar-image" src="assets/images/home2.png" alt="Game Avatar">
                     <div id="avatar-speech-bubble" class="speech-bubble">
                         <p id="avatar-message">Hi there! I'm getting ready to play! 😊</p>
                     </div>
-                </div>
-            </section>
-
-            <!-- Game Content -->
-            <section id="game-content">
-                <!-- Real-time Video Feed (Full Screen) -->
-                <div id="video-section" class="video-section hidden">
-                    <div class="video-container">
-                        <img id="video-feed" class="video-feed" alt="Camera feed">
-                        <div class="video-overlay">
-                            <div id="gesture-indicator" class="gesture-indicator">Show your hand!</div>
-                            <!-- Number Display as overlay on video -->
-                            <div id="number-display" class="number-display-overlay">
-                                <div id="current-number" class="current-number-overlay">1</div>
-                                <div id="number-dots" class="number-dots-overlay"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Instructions -->
-                <div id="instruction-panel" class="instruction-panel game-setup-ui">
-                    <h2 id="main-instruction">Getting ready to play...</h2>
-                    <p id="sub-instruction">Please wait while I set up the camera!</p>
-                </div>
-
-                <!-- Progress Bar -->
-                <div id="progress-section" class="progress-section hidden game-setup-ui">
-                    <div class="progress-label">Numbers completed:</div>
-                    <div id="progress-bar" class="progress-bar">
-                        <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
-                    </div>
-                    <div id="progress-text" class="progress-text">0 / 10</div>
                 </div>
             </section>
 
@@ -83,13 +44,27 @@
                     <button id="start-game-btn" class="btn btn-success hidden">Start Counting Game!</button>
                 </div>
             </section>
+
+            <!-- Real-time Video Feed (Full Screen) -->
+            <div id="video-section" class="video-section hidden">
+                <div class="video-container">
+                    <img id="video-feed" class="video-feed" alt="Camera feed">
+                    <div class="video-overlay">
+                        <div id="gesture-indicator" class="gesture-indicator">Show your hand!</div>
+                        <!-- Number Image as overlay on video -->
+                        <div id="number-display" class="number-display-overlay">
+                            <img id="number-image" class="number-image-overlay" src="assets/images/1.png" alt="Number 1">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <!-- Celebration Overlay -->
         <div id="celebration-overlay" class="celebration-overlay hidden">
             <div class="celebration-content">
                 <h1>🎉 Amazing Job! 🎉</h1>
-                <p>You counted all the way to 10!</p>
+                <p>You counted all the way to 5!</p>
                 <div class="confetti"></div>
                 <button id="play-again-btn" class="btn btn-primary">Play Again!</button>
             </div>

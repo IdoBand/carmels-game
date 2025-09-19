@@ -20,6 +20,9 @@ class GameClient {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
 
+        // Audio manager
+        this.audioManager = null;
+
         console.log('🎮 GameClient initialized');
     }
 
@@ -42,8 +45,7 @@ class GameClient {
 
             // Game content elements
             numberDisplay: document.getElementById('number-display'),
-            currentNumber: document.getElementById('current-number'),
-            numberDots: document.getElementById('number-dots'),
+            numberImage: document.getElementById('number-image'),
             mainInstruction: document.getElementById('main-instruction'),
             subInstruction: document.getElementById('sub-instruction'),
 
@@ -114,6 +116,20 @@ class GameClient {
             this.reconnectAttempts = 0;
             this.updateConnectionStatus('connected', 'Connected to game server');
             this.updateDebugInfo('connection', 'Connected');
+
+            // Initialize audio manager
+            if (!this.audioManager) {
+                this.audioManager = new AudioManager();
+                this.setupAudioCallbacks();
+
+                // Add audio manager to window for debugging
+                window.audioManager = this.audioManager;
+
+                // Wait for audio manager to fully initialize
+                setTimeout(() => {
+                    console.log('🔊 Audio manager initialization complete');
+                }, 1000);
+            }
         });
 
         this.socket.on('disconnect', () => {
@@ -176,6 +192,37 @@ class GameClient {
         this.socket.on('next_number', (data) => {
             console.log('➡️ Next number:', data);
             this.handleNextNumber(data);
+        });
+
+        // New Game Flow Events
+        this.socket.on('play_audio', (data) => {
+            console.log('🔊 Play audio request:', data);
+            this.handlePlayAudio(data);
+        });
+
+        this.socket.on('play_audio_sequence', (data) => {
+            console.log('🔊 Play audio sequence:', data);
+            this.handlePlayAudioSequence(data);
+        });
+
+        this.socket.on('play_random_positive_feedback', (data) => {
+            console.log('🎉 Play random positive feedback');
+            this.handlePlayRandomPositiveFeedback();
+        });
+
+        this.socket.on('number_started', (data) => {
+            console.log('🔢 Number started:', data);
+            this.handleNumberStarted(data);
+        });
+
+        this.socket.on('game_completed', (data) => {
+            console.log('🎉 Game completed:', data);
+            this.handleGameCompleted(data);
+        });
+
+        this.socket.on('game_restarted', (data) => {
+            console.log('🔄 Game restarted');
+            this.handleGameRestarted();
         });
 
         console.log('📡 Socket event handlers setup complete');
@@ -251,6 +298,11 @@ class GameClient {
         this.updateAvatarMessage('Starting the camera... Get ready to count!');
         this.elements.startGameBtn.disabled = true;
 
+        // Resume audio context on user interaction
+        if (this.audioManager) {
+            this.audioManager.resumeAudioContext();
+        }
+
         if (this.socket) {
             this.socket.emit('start_camera', { camera_index: cameraIndex });
         }
@@ -289,8 +341,7 @@ class GameClient {
         this.elements.gestureIndicator.textContent = `${number} finger${number > 1 ? 's' : ''} detected!`;
         this.elements.gestureIndicator.style.background = 'rgba(81, 207, 102, 0.8)'; // Green
 
-        // Update number display
-        this.displayNumber(number);
+        // DO NOT update number display here - that shows the target number, not detected gesture
     }
 
     handleGestureLost(data) {
@@ -299,7 +350,124 @@ class GameClient {
         this.elements.gestureIndicator.style.background = 'rgba(0, 0, 0, 0.7)'; // Back to black
     }
 
-    // Removed all game logic as requested
+    // Audio Management
+    setupAudioCallbacks() {
+        if (!this.audioManager) return;
+
+        // Set up audio finished callback
+        this.audioManager.onAudioFinished = (audioFile) => {
+            console.log(`🔊 Audio finished: ${audioFile}`);
+            if (this.socket) {
+                this.socket.emit('audio_finished', { file: audioFile });
+            }
+        };
+    }
+
+    // Game Flow Event Handlers
+    async handlePlayAudio(data) {
+        const audioFile = data.file;
+
+        if (!this.audioManager) {
+            console.warn('⚠️ Audio manager not initialized');
+            return;
+        }
+
+        try {
+            // Map backend file names to audio manager methods
+            if (audioFile === 'hi_ready_to_play') {
+                await this.audioManager.playGreeting();
+            } else if (audioFile === 'show_me_your_fingers') {
+                await this.audioManager.playShowFingers();
+            } else if (audioFile === 'lets_start_counting') {
+                await this.audioManager.playLetsStartCounting();
+            } else if (audioFile.startsWith('number_')) {
+                const number = parseInt(audioFile.split('_')[1]);
+                await this.audioManager.playNumber(number);
+            } else if (audioFile === 'try_again') {
+                await this.audioManager.playTryAgain();
+            }
+        } catch (error) {
+            console.error('❌ Audio playback error:', error);
+        }
+    }
+
+    async handlePlayAudioSequence(data) {
+        const sequence = data.sequence || [];
+
+        for (const audioFile of sequence) {
+            await this.handlePlayAudio({ file: audioFile });
+            await this.audioManager.waitForAudioToFinish();
+
+            // 2-second delay between audio files for clarity
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    async handlePlayRandomPositiveFeedback() {
+        if (!this.audioManager) {
+            console.warn('⚠️ Audio manager not initialized');
+            return;
+        }
+
+        try {
+            await this.audioManager.playRandomPositiveFeedback();
+        } catch (error) {
+            console.error('❌ Positive feedback audio error:', error);
+        }
+    }
+
+    handleNumberStarted(data) {
+        const number = data.number;
+        const timeout = data.timeout;
+
+        console.log(`🔢 Starting number ${number} with ${timeout}ms timeout`);
+
+        // Update UI to show current number
+        this.currentNumber = number;
+        this.displayNumber(number);
+
+        // Update phase
+        this.currentPhase = 'counting_game';
+        this.updateDebugInfo('phase', this.currentPhase);
+        this.updateDebugInfo('number', number);
+
+        // Show instruction
+        this.elements.gestureIndicator.textContent = `Show me ${number} finger${number > 1 ? 's' : ''}!`;
+    }
+
+    handleGameCompleted(data) {
+        console.log('🎉 Game completed!', data);
+
+        // Show celebration
+        this.elements.celebrationOverlay.classList.remove('hidden');
+
+        // Update phase
+        this.currentPhase = 'completed';
+        this.updateDebugInfo('phase', this.currentPhase);
+
+        // Reset number display
+        this.elements.gestureIndicator.textContent = 'Congratulations! You counted to 5!';
+    }
+
+    handleGameRestarted() {
+        console.log('🔄 Game restarted');
+
+        // Hide celebration overlay
+        this.elements.celebrationOverlay.classList.add('hidden');
+
+        // Reset to setup phase
+        this.currentPhase = 'setup';
+        this.currentNumber = 1;
+
+        // Show setup UI again
+        document.body.classList.remove('video-active');
+        this.elements.videoSection.classList.add('hidden');
+
+        // Reset debug info
+        this.updateDebugInfo('phase', this.currentPhase);
+        this.updateDebugInfo('number', this.currentNumber);
+        this.updateDebugInfo('gesture', 'None');
+    }
 
     // UI Update Methods
     updateConnectionStatus(status, message) {
@@ -318,19 +486,11 @@ class GameClient {
     }
 
     displayNumber(number) {
-        this.elements.currentNumber.textContent = number;
-
-        // Create dots for visual representation
-        const dotsContainer = this.elements.numberDots;
-        dotsContainer.innerHTML = '';
-
-        // Limit dots to avoid overwhelming display (max 10)
-        const dotCount = Math.min(number, 10);
-        for (let i = 0; i < dotCount; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.style.animationDelay = `${i * 0.1}s`;
-            dotsContainer.appendChild(dot);
+        // Update number image source
+        if (this.elements.numberImage) {
+            this.elements.numberImage.src = `assets/images/${number}.png`;
+            this.elements.numberImage.alt = `Number ${number}`;
+            console.log(`📸 Updated number image to: ${number}.png`);
         }
     }
 
@@ -369,6 +529,13 @@ class GameClient {
 
     dismissError() {
         this.elements.errorModal.classList.add('hidden');
+    }
+
+    restartGame() {
+        console.log('🔄 Requesting game restart');
+        if (this.socket) {
+            this.socket.emit('restart_game', {});
+        }
     }
 
     // Utility Methods
